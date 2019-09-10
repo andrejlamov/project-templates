@@ -25,7 +25,9 @@ cat test-project/%NAME1%/%NAME2%/%NAME2%-hello.txt
 : 
 : How are you?
 : 
-Now run ~template.sh~ with variables set in the environment and a path to a template folder
+
+Now run ~template.sh~ with variables set in the environment and a path to a template folder,
+it will output the commands that will be executed if you pipe it to ~sh~
 
 #+BEGIN_SRC bash :results output :exports both
 mkdir -p hello
@@ -33,24 +35,24 @@ cd hello
 NAME1=src NAME2=andrej/lamov GREET='hello world' ../template.sh ../test-project
 #+END_SRC
 
-It outputs some info...
 #+RESULTS:
-#+begin_example
-Source template:
-  /home/andrej/code/template/test-project
-Target:
-  /home/andrej/code/template/hello
-Variables:
-  GREET=hello world
-  NAME1=src
-  NAME2=andrej/lamov
-Using sed:
-   -e 's\%GREET%\hello world\g' -e 's\%NAME1%\src\g' -e 's\%NAME2%\andrej/lamov\g'
-Copying:
-  %NAME1%/%NAME2%/%NAME2%-hello.txt -> src/andrej/lamov/andrej/lamov-hello.txt
-#+end_example
+: set -xe
+: SED_EXPR='s\%GREET%\hello world\g; s\%NAME1%\src\g; s\%NAME2%\andrej/lamov\g; '
+: mkdir -p        '/home/andrej/code/template/hello/src/andrej/lamov/andrej'
+: sed "$SED_EXPR" '/home/andrej/code/template/test-project/%NAME1%/%NAME2%/%NAME2%-hello.txt' > '/home/andrej/code/template/hello/src/andrej/lamov/andrej/lamov-hello.txt'
 
-And it results in the following structure
+Pipe it to ~sh~
+
+#+BEGIN_SRC bash :results output :exports both
+mkdir -p hello
+cd hello
+NAME1=src NAME2=andrej/lamov GREET='hello world' ../template.sh ../test-project | sh
+#+END_SRC
+
+#+RESULTS:
+
+And it results in the following structure and content
+
 #+BEGIN_SRC bash :results output :exports both
 tree hello
 #+END_SRC
@@ -64,7 +66,6 @@ tree hello
 :                 └── lamov-hello.txt
 : 
 : 4 directories, 1 file
-
 
 #+BEGIN_SRC bash :results output :exports both
 cat hello/src/andrej/lamov/andrej/lamov-hello.txt
